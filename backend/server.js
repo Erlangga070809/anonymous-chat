@@ -3,6 +3,7 @@ const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
 const socketIo = require('socket.io');
+const path = require('path');
 const config = require('./config');
 const { pool } = require('./utils/db');
 const { initializeSocket } = require('./utils/socketHandler');
@@ -32,16 +33,19 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use(express.static('frontend'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const matchRoutes = require('./routes/match.routes');
 const chatRoutes = require('./routes/chat.routes');
+const uploadRoutes = require('./routes/upload.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/upload', uploadRoutes);
 
 initializeSocket(io);
 
