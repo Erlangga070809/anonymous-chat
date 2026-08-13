@@ -36,10 +36,12 @@ app.use(express.static('frontend'));
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const matchRoutes = require('./routes/match.routes');
+const chatRoutes = require('./routes/chat.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/match', matchRoutes);
+app.use('/api/chat', chatRoutes);
 
 initializeSocket(io);
 
