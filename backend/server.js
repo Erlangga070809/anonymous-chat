@@ -2,11 +2,21 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
+const socketIo = require('socket.io');
 const config = require('./config');
 const { pool } = require('./utils/db');
+const { initializeSocket } = require('./utils/socketHandler');
 
 const app = express();
 const server = http.createServer(app);
+
+const io = socketIo(server, {
+    cors: {
+        origin: process.env.NODE_ENV === 'production' ? ['https://your-domain.vercel.app'] : ['http://localhost:3000'],
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
+});
 
 app.use(helmet({
     contentSecurityPolicy: false,
@@ -25,9 +35,13 @@ app.use(express.static('frontend'));
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
+const matchRoutes = require('./routes/match.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/match', matchRoutes);
+
+initializeSocket(io);
 
 app.get('/health', async (req, res) => {
     try {
@@ -43,8 +57,9 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
 });
 
-server.listen(config.port, () => {
-    console.log(`Server running on port ${config.port}`);
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
 
-module.exports = { app, server };
+module.exports = { app, server, io };
